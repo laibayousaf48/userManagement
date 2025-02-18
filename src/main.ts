@@ -12,6 +12,23 @@ async function bootstrap() {
 
 const document = SwaggerModule.createDocument(app, config);
 SwaggerModule.setup('api/docs', app, document);
+
+app.use((req, res, next) => {
+  const originalJson = res.json;
+  res.json = (data) => {
+    // Check if the data contains BigInt, and convert it to string
+    const stringifyBigInt = (key, value) => {
+      if (typeof value === 'bigint') {
+        return value.toString();  // Convert BigInt to string
+      }
+      return value;
+    };
+    res.setHeader('Content-Type', 'application/json');
+    return originalJson.call(res, JSON.stringify(data, stringifyBigInt));  // Use custom replacer
+  };
+  next();
+});
+
   await app.listen(process.env.PORT ?? 3001);
 }
 bootstrap();

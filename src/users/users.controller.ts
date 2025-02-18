@@ -16,12 +16,31 @@ export class UserController {
     return this.userService.create(createUserDto);
   }
 
+  // @Get()
+  // @ApiOperation({ summary: 'Get all users' })
+  // @ApiResponse({ status: 200 })
+  // findAll() {
+  //   const users = await this.userService.findAll();
+  //   return users.map(user => ({
+  //     ...user,
+  //     id: user.id.toString(),  // Convert BigInt id to string
+  //     created_by: user.created_by ? user.created_by.toString() : null,  // Convert BigInt created_by to string
+  //   }));
+  // }
   @Get()
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({ status: 200 })
-  findAll() {
-    return this.userService.findAll();
+  async findAll() {
+    const users = await this.userService.findAll();  // Ensure you await the async method
+  
+    return users.map(user => ({
+      ...user,
+      id: user.id.toString(),  // Convert BigInt id to string
+      created_by: user.createdBy ? user.createdBy.toString() : null,  // Convert BigInt created_by to string
+    }));
   }
+  
+
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a user by ID' })
