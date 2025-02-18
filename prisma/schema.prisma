@@ -1,0 +1,87 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          BigInt   @id @default(autoincrement())
+  email       String   @unique @db.VarChar(255)
+  password    String   @db.VarChar(255)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  isVerified  Boolean  @default(false) @map("is_verified")
+  name        String?  @db.VarChar(255) // Optional
+  createdBy   BigInt?  @map("created_by")
+  isSuspended Boolean  @default(false) @map("is_suspended")
+  deletedAt   DateTime? @map("deleted_at")
+
+  verifications Verifications[]
+}
+
+model Verifications {
+  id         BigInt   @id @default(autoincrement())
+  entry      String   @db.VarChar(255) // ENUM: user, client
+  key        String   @db.VarChar(255) // ENUM: reset_password, email_verification, etc.
+  entityId   BigInt   @map("entity_id") // Foreign key polymorphic association
+  token      String   @db.VarChar(255)
+  createdAt  DateTime @default(now()) @map("created_at")
+  expiresAt  DateTime @map("expires_at")
+  verifiedAt DateTime? @map("verified_at")
+  createdBy  BigInt?  @map("created_by")
+
+  user       User? @relation(fields: [entityId], references: [id])
+}
+
+model ThirdPartyClients {
+  id          BigInt   @id @default(autoincrement())
+  name        String
+  key         String
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  isVerified  Boolean  @map("is_verified")
+  description String?  @map("description")
+  createdBy   BigInt?  @map("created_by")
+  deletedAt   DateTime? @map("deleted_at")
+
+  apiKeys ThirdPartyClientsApiKeys[] @relation("ClientApiKeys")
+}
+
+model ThirdPartyClientsApiKeys {
+  id        BigInt   @id @default(autoincrement())
+  clientId  BigInt   @map("client_id")
+  key       String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  isActive  Boolean  @map("is_active")
+  createdBy BigInt?  @map("created_by")
+  revokedAt DateTime? @map("revoked_at")
+
+  client ThirdPartyClients @relation(fields: [clientId], references: [id], name: "ClientApiKeys")
+  logs ThirdPartyClientsApiKeysLogs[] @relation("ApiKeyLogs")
+}
+
+model ThirdPartyClientsApiKeysLogs {
+  id         BigInt   @id @default(autoincrement())
+  keyId      BigInt   @map("key_id")
+  endpoint   String
+  ipAddress  String   @map("ip_address")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  createdBy  BigInt?  @map("created_by")
+
+  apiKey ThirdPartyClientsApiKeys @relation(fields: [keyId], references: [id], name: "ApiKeyLogs")
+}
+
+model TokenBlacklist {
+  id         BigInt   @id @default(autoincrement())
+  token      String
+  createdAt  DateTime @default(now())
+  expiresAt  DateTime
+}
+
+
