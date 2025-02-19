@@ -12,9 +12,9 @@ export class CreateThirdPartyClientDto {
   @IsNotEmpty()
   key: string;
 
-  @ApiProperty({ example: true, description: 'Indicates if the third-party client is verified' })
-  @IsBoolean()
-  isVerified: boolean;
+  // @ApiProperty({ example: true, description: 'Indicates if the third-party client is verified' })
+  // @IsBoolean()
+  // isVerified: boolean;
 
   @ApiProperty({ example: 'This is a sample third-party client.', description: 'Optional description of the third-party client', required: false })
   @IsString()

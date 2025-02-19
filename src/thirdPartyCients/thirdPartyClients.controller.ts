@@ -1,5 +1,5 @@
 // src/third-party-clients/third-party-clients.controller.ts
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, Patch, ParseIntPipe } from '@nestjs/common';
 import { ThirdPartyClientsService } from './thirdPartyClients.service';
 import { CreateThirdPartyClientDto } from './dto/create-third-party-client.dto';
 import { UpdateThirdPartyClientDto } from './dto/update-third-party-client.dto';
@@ -48,5 +48,14 @@ export class ThirdPartyClientsController {
   @ApiResponse({status: 404, description: 'bad request'})
   remove(@Param('id') id: number) {
     return this.thirdPartyClientsService.remove(id);
+  }
+
+  @Patch(':id/verify')
+  @ApiOperation({ summary: 'Mark client as verified (isVerified = true)' })
+  @ApiResponse({ status: 200, description: 'Client successfully verified' })
+  @ApiResponse({ status: 404, description: 'Client not found' })
+  @ApiResponse({ status: 400, description: 'Client already verified' })
+  async verify(@Param('id', ParseIntPipe) id: number) {
+    return this.thirdPartyClientsService.verifyClient(id);
   }
 }

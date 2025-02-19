@@ -1,5 +1,5 @@
 // src/third-party-clients/third-party-clients.service.ts
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, InternalServerErrorException} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service'; // Assuming PrismaService is set up
 import { CreateThirdPartyClientDto } from './dto/create-third-party-client.dto';
 import { UpdateThirdPartyClientDto } from './dto/update-third-party-client.dto';
@@ -14,7 +14,8 @@ export class ThirdPartyClientsService {
       data: {
         name: createDto.name,
         key: createDto.key,
-        isVerified: createDto.isVerified, // Ensure this field is passed
+        // isVerified: createDto.isVerified, // Ensure this field is passed
+        isVerified: false, // Ensure this field is passed
         description: createDto.description,
       },
     });
@@ -63,5 +64,30 @@ export class ThirdPartyClientsService {
     return this.prisma.thirdPartyClients.delete({
       where: { id },
     });
+  }
+
+  // verify client
+  async verifyClient(id: number) {
+    try {
+      if (!id) throw new BadRequestException('Client ID is required');
+
+      const client = await this.prisma.thirdPartyClients.findUnique({ where: { id } });
+      if (!client) throw new NotFoundException(`Third-Party Client with ID ${id} not found`);
+
+      if (client.isVerified) throw new BadRequestException(`Client with ID ${id} is already verified`);
+
+      return await this.prisma.thirdPartyClients.update({
+        where: { id },
+        data: { isVerified: true },
+      });
+    } catch (error) {
+      console.error('🔥 Error verifying client:', error?.message || error);
+
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException('Unexpected error occurred while verifying client');
+    }
   }
 }
