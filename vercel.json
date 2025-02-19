@@ -2,12 +2,24 @@
     "version": 2,
     "builds": [
       {
-        "src": "src/main.ts",
+        "src": "package.json",
         "use": "@vercel/node"
       }
     ],
     "routes": [
-      { "src": "/(.*)", "dest": "/src/main.ts" }
-    ]
+      {
+        "src": "/(.*)",
+        "dest": "dist/main.js"
+      }
+    ],
+    "env": {
+      "DATABASE_URL": "postgresql://postgres:postgres@localhost:5432/userAuthentication?schema=public",
+      "EMAIL_HOST": "smtp.gmail.com",
+    "EMAIL_PORT": "587",
+    "EMAIL_USER": "laibahaven@gmail.com",
+    "EMAIL_PASSWORD": "defowosjvmphibnp",
+    "JWT_SECRET": "eba18b9dc74d2a9df1242f3d2d2ec0b11e77fdc327eb2bbed71e43c6d3654de6b46707464de05b0c431f2ddea05f7309ceebb9400d347183c03c9320deb709c2"
+
+    }
   }
   
